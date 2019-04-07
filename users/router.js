@@ -10,6 +10,7 @@ const jsonParser = bodyParser.json();
 
 // Post to register a new user
 router.post('/', jsonParser, (req, res) => {
+  console.log('1');
   const requiredFields = ['username', 'password'];
   const missingField = requiredFields.find(field => !(field in req.body));
 
@@ -21,7 +22,7 @@ router.post('/', jsonParser, (req, res) => {
       location: missingField
     });
   }
-
+  console.log('2');
   const stringFields = ['username', 'password', 'firstName', 'lastName'];
   const nonStringField = stringFields.find(
     field => field in req.body && typeof req.body[field] !== 'string'
@@ -35,7 +36,7 @@ router.post('/', jsonParser, (req, res) => {
       location: nonStringField
     });
   }
-
+  console.log('3');
   // If the username and password aren't trimmed we give an error.  Users might
   // expect that these will work without trimming (i.e. they want the password
   // "foobar ", including the space at the end).  We need to reject such values
@@ -47,7 +48,7 @@ router.post('/', jsonParser, (req, res) => {
   const nonTrimmedField = explicityTrimmedFields.find(
     field => req.body[field].trim() !== req.body[field]
   );
-
+  console.log('4');
   if (nonTrimmedField) {
     return res.status(422).json({
       code: 422,
@@ -78,7 +79,7 @@ router.post('/', jsonParser, (req, res) => {
       'max' in sizedFields[field] &&
             req.body[field].trim().length > sizedFields[field].max
   );
-
+  console.log('5');
   if (tooSmallField || tooLargeField) {
     return res.status(422).json({
       code: 422,
@@ -97,7 +98,7 @@ router.post('/', jsonParser, (req, res) => {
   // before this
   firstName = firstName.trim();
   lastName = lastName.trim();
-
+  User.find({username}).then(username => console.log(username));
   return User.find({username})
     .count()
     .then(count => {
@@ -114,6 +115,12 @@ router.post('/', jsonParser, (req, res) => {
       return User.hashPassword(password);
     })
     .then(hash => {
+      console.log({
+        username,
+        password: hash,
+        firstName,
+        lastName
+      })
       return User.create({
         username,
         password: hash,
@@ -127,9 +134,13 @@ router.post('/', jsonParser, (req, res) => {
     .catch(err => {
       // Forward validation errors on to the client, otherwise give a 500
       // error because something unexpected has happened
+      console.log({username,
+        firstName,
+        lastName})
       if (err.reason === 'ValidationError') {
         return res.status(err.code).json(err);
       }
+      console.log(err);
       res.status(500).json({code: 500, message: 'Internal server error'});
     });
 });

@@ -5,13 +5,7 @@ const mongoose = require('mongoose');
 const morgan = require('morgan');
 const passport = require('passport');
 
-// Here we use destructuring assignment with renaming so the two variables
-// called router (from ./users and ./auth) have different names
-// For example:
-// const actorSurnames = { james: "Stewart", robert: "De Niro" };
-// const { james: jimmy, robert: bobby } = actorSurnames;
-// console.log(jimmy); // Stewart - the variable name is jimmy, not james
-// console.log(bobby); // De Niro - the variable name is bobby, not robert
+
 const { router: usersRouter } = require('./users');
 const { router: authRouter, localStrategy, jwtStrategy } = require('./auth');
 
@@ -41,6 +35,7 @@ passport.use(jwtStrategy);
 app.use('/api/users/', usersRouter);
 app.use('/api/auth/', authRouter);
 
+
 const jwtAuth = passport.authenticate('jwt', { session: false });
 
 // A protected endpoint which needs a valid JWT to access it
@@ -49,6 +44,38 @@ app.get('/api/protected', jwtAuth, (req, res) => {
     data: 'rosebud'
   });
 });
+
+
+// protected Visited put endpoint
+// post  to visited endpoint
+// app.post('/api/visited', jwtAuth, (req, res) => {
+//   const requiredFields = ["parkId", "visited"];
+//   requiredFields.forEach(field => {
+//     if (!(field in req.body)) {
+//       const message = `Missing \`${field}\` in request body`;
+//       console.error(message);
+//       return res.status(400).send(message);
+//     }
+//   });
+//   Visited
+//   .create({
+//     parkId: req.body.parkId,
+//     visited: req.body.visited
+//   })
+//   .then(visits => 
+//     {
+//       console.log(visits)
+//       res.status(201).json({
+//         parkId: visits.parkId,
+//         visited: visits.visited
+//       })
+//     })
+//   .catch(err => {
+//     console.error(err);
+//     res.status(500).json({ error: 'Something went wrong here line 82' });
+//   });
+
+// });
 
 app.use('*', (req, res) => {
   return res.status(404).json({ message: 'Not Found' });
